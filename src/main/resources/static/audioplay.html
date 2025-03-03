@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频片段播放</title>
+    <link rel="stylesheet" href="css/audioplay.css">
+    <!-- 指定自定义图标 -->
+    <link rel="icon" href="icon.png" type="image/png">
+</head>
+
+<body>
+<div class="modal-overlay" id="textModal">
+    <div class="modal-content" id="modalText"></div>
+</div>
+<!-- 在页面底部添加返回顶部按钮 -->
+<div id="back-to-top" title="返回顶部">↑</div>
+<!-- 新增悬浮控制按钮 -->
+<div class="floating-controls">
+    <button id="prevLoopButton">上一个循环</button>
+    <button id="nextLoopButton">下一个循环</button>
+</div>
+<div id="currentIdDisplay" style="font-size: 24px; margin-bottom: 20px;">
+    当前循环的音频 ID: <span id="currentId">无</span>
+    <br>
+    之前播放的音频 id：<span id="previousId" style="cursor: pointer;">无</span>
+</div>
+<div class="search-container">
+    <input type="text" id="titleSearchInput" placeholder="搜索标题">
+    <button id="titleSearchButton">搜索</button>
+</div>
+
+<div class="speed-container">
+    <label for="globalSpeedSelect">全局速度：</label>
+    <select id="globalSpeedSelect">
+        <option value="0.6">0.6</option>
+        <option value="0.8">0.8</option>
+        <option value="1.0" selected>1.0</option>
+        <option value="1.2">1.2</option>
+        <option value="1.3">1.3</option>
+        <option value="1.5">1.5</option>
+    </select>
+    <button id="loopAllButton">循环全部</button>
+    <button id="stopButton">停止播放</button>
+</div>
+<table id="audioTable">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>title</th>
+        <th>word</th>
+        <th>phrase</th>
+        <th>text</th>
+        <th>a点</th>
+        <th>b点</th>
+        <th>速度</th>
+        <th>循环片段</th>
+        <th>停止播放</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<!-- 新增浮窗元素 -->
+<div id="tooltip" class="tooltip"></div>
+
+</body>
+
+<!-- 引入外部 JavaScript 文件 -->
+<script src="js/audioplay.js"></script>
+
+</html>
