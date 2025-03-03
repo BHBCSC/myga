@@ -8,7 +8,7 @@ titleSearchButton.addEventListener('click', function () {
         // 保存搜索框内容到 localStorage
         localStorage.setItem('searchTitle', searchTitle);
         // 调用搜索接口
-        fetch(`/audio-clips/title/${searchTitle}`)
+        fetch(`/savedAudioClips?title=${searchTitle}`)
           .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP 错误! 状态码: ${response.status}`);
@@ -23,7 +23,7 @@ titleSearchButton.addEventListener('click', function () {
             });
     } else {
         localStorage.removeItem('searchTitle');
-        fetch(`/audio-clips`)
+        fetch(`/savedAudioClips`)
                   .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP 错误! 状态码: ${response.status}`);
@@ -94,7 +94,7 @@ updateIdDisplayFromLocalStorage();
 const storedSearchTitle = localStorage.getItem('searchTitle');
 if (storedSearchTitle) {
     // 如果有，使用搜索接口
-    fetch(`/audio-clips/title/${storedSearchTitle}`)
+    fetch(`/savedAudioClips?title=${storedSearchTitle}`)
       .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP 错误! 状态码: ${response.status}`);
@@ -111,7 +111,7 @@ if (storedSearchTitle) {
         });
 } else {
     // 如果没有，使用原接口
-    fetch('/audio-clips')
+    fetch('/savedAudioClips')
       .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP 错误! 状态码: ${response.status}`);
@@ -162,7 +162,7 @@ function processData(data) {
 
     for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        const { id, title, word, phrase, text, dataTranslation, apoint, bpoint } = item;
+        const { id, title, word, phrase, text, dataTranslation, pointA, pointB } = item;
         if (id && title) {
             const audioUrl = `/audio/${title}.mp3`;
 
@@ -223,8 +223,8 @@ function processData(data) {
             }
 
             // 填充 a 点和 b 点单元格
-            aCell.textContent = apoint;
-            bCell.textContent = bpoint;
+            aCell.textContent = pointA;
+            bCell.textContent = pointB;
 
             // 创建速度选择框
             const speedSelect = document.createElement('select');

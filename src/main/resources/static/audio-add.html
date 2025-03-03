@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP3播放器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 36px;
+        }
+      .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        button {
+            font-size: 36px;
+            padding: 20px 40px;
+            margin: 10px;
+        }
+        input {
+            font-size: 36px;
+            padding: 10px;
+            width: 80%;
+        }
+        audio {
+            width: 100%;
+            height: 100px;
+        }
+      .small-btn {
+            font-size: 20px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="controls">
+        <label for="title">标题：</label>
+        <input type="text" id="title" placeholder="请输入标题">
+        <button onclick="loadAudio()">加载音频</button>
+        <br><br>
+
+        <button onclick="seekBackward()">倒退3秒</button>
+        <button onclick="recordA()">记录A点</button>
+        <button onclick="recordB()">记录B点</button>
+        <button onclick="loopAB()">循环AB</button>
+        <button onclick="togglePlaybackSpeed()">速度切换</button>
+                <button onclick="queryText()">查询文本</button>
+        <!-- 保存AB按钮移动到此处 -->
+        <button onclick="saveAB()">保存AB</button>
+        <button onclick="continuePlayback()">继续播放</button>
+        <button onclick="seekForward()">前进3秒</button>
+        <br><br>
+        <div>
+            A点：<span id="a-point">0.00</span>秒
+            B点：<span id="b-point">0.00</span>秒
+            <br>
+            <!-- 新增展示查询结果的区域 -->
+            <div id="query-result"></div>
+            <!-- 新增上一句、下一句按钮 -->
+            <button onclick="prevSentence()">上一句</button>
+            <button onclick="nextSentence()">下一句</button>
+        </div>
+    </div>
+    <audio id="audio" controls>
+        <source id="audio-source" src="" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+    </audio>
+    <div class="saved-list">
+        <h3>已保存AB片段：</h3>
+        <button onclick="clearAllAB()" class="small-btn">全部删除</button>
+        <button onclick="playList()">播放列表</button>
+        <ul id="ab-list"></ul>
+        <button onclick="batchSaveAB()">批量保存AB</button>
+    </div>
+</div>
+<script>
+    let audio = document.getElementById("audio");
+    let audioSource = document.getElementById("audio-source");
+    let pointA = 0;
+    let pointB = 0;
+    let isLooping = false;
+    let savedABList = [];
+    let isInLoop = false; // 用于控制是否处于循环状态
+    let currentId = 100;  // ID 从 100 开始递增
+    let currentQueryIndex = -1; // 记录当前查询结果的索引
+    let audioData = []; // 新增全局变量用于存储从接口获取的数据
+
+    // 获取并加载本地存储的数据
+    window.onload = function () {
+        loadSavedAB();
+        loadCachedData();
+    };
+
+    function loadCachedData() {
+        const title = localStorage.getItem('title');
+        if (title) {
+            document.getElementById('title').value = title;
+            const mp3Url = `/audio/${title}.mp3`;
+            audioSource.src = mp3Url;
+            audio.load();
+
+            // 从接口获取数据
+            fetch(`/originalAudioClips?title=${title}`)
+              .then(response => response.json())
+              .then(data => {
+                    audioData = data; // 存储获取到的数据
+                })
+              .catch(error => console.error('获取数据出错:', error));
+        }
+        const lastTime = localStorage.getItem('lastTime');
+        if (lastTime) {
+            audio.currentTime = parseFloat(lastTime);
+        }
+    }
+
+    function saveCachedData() {
+        const title = document.getElementById('title').value.trim();
+        localStorage.setItem('title', title);
+        localStorage.setItem('lastTime', audio.currentTime);
+    }
+
+    function seekBackward() {
+        audio.currentTime = Math.max(0, audio.currentTime - 3);
+    }
+
+    function seekForward() {
+        audio.currentTime = Math.min(audio.duration, audio.currentTime + 3);
+    }
+
+    function loadAudio() {
+        const title = document.getElementById('title').value.trim();
+        if (title) {
+            const url = `/audio/${title}.mp3`;
+            audioSource.src = url;
+            audio.load();
+            saveCachedData();  // 缓存标题
+
+            // 从接口获取数据
+            fetch(`/originalAudioClips/title/${title}`)
+              .then(response => response.json())
+              .then(data => {
+                    audioData = data; // 存储获取到的数据
+                })
+              .catch(error => console.error('获取数据出错:', error));
+        }
+    }
+
+    function recordA() {
+        pointA = audio.currentTime;
+        document.getElementById('a-point').textContent = pointA.toFixed(2);
+    }
+
+    function recordB() {
+        pointB = audio.currentTime;
+        document.getElementById('b-point').textContent = pointB.toFixed(2);
+    }
+
+    function loopAB() {
+        if (pointA && pointB && pointB > pointA) {
+            isLooping = true;
+            isInLoop = true;
+            audio.currentTime = pointA;
+            audio.play();
+            let loopCheck = function () {
+                if (isLooping && audio.currentTime >= pointB) {
+                    audio.currentTime = pointA;
+                    audio.play();
+                }
+                if (!isLooping) {
+                    audio.removeEventListener("timeupdate", loopCheck);
+                }
+            };
+            audio.addEventListener("timeupdate", loopCheck);
+        } else {
+            alert("请先设置 A 和 B 点，并确保 B > A！");
+        }
+    }
+
+    function continuePlayback() {
+        if (isInLoop) {
+            isLooping = false;
+            isInLoop = false;  // 跳出循环
+            audio.play();
+        } else {
+            audio.play();  // 正常继续播放
+        }
+    }
+
+    // 新增速度切换函数
+    function togglePlaybackSpeed() {
+        if (audio.playbackRate === 1) {
+            audio.playbackRate = 0.6;
+        } else if (audio.playbackRate === 0.6) {
+            audio.playbackRate = 1;
+        }
+    }
+
+   function updateABList() {
+    let abList = document.getElementById('ab-list');
+    abList.innerHTML = "";
+    savedABList.forEach((item, index) => {
+        let listItem = document.createElement('li');
+        let deleteButton = document.createElement('button');
+        deleteButton.textContent = "删除";
+        deleteButton.onclick = function () {
+            savedABList.splice(index, 1); // 删除当前片段
+            localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 更新存储
+            updateABList();
+        };
+        let playButton = document.createElement('button');
+        playButton.textContent = `AB片段 ${item.id} (${item.a.toFixed(2)}s - ${item.b.toFixed(2)}s)`;
+        playButton.onclick = function () {
+            playAB(item.a, item.b);
+        };
+        let loopButton = document.createElement('button');
+        loopButton.textContent = "循环片段";
+        loopButton.onclick = function () {
+            loopSpecificAB(item.a, item.b);
+        };
+
+        // 新增 word 和 phrase 展示及输入框
+        let wordDiv = document.createElement('div');
+        // 判断 item.word 是否为 undefined，如果是则显示为空字符串
+        let wordValue = item.word!== undefined? item.word : '';
+        wordDiv.textContent = `word: ${wordValue}`;
+        // 为 word 字段添加红色样式
+        wordDiv.style.color = 'red';
+        let phraseDiv = document.createElement('div');
+        // 判断 item.phrase 是否为 undefined，如果是则显示为空字符串
+        let phraseValue = item.phrase!== undefined? item.phrase : '';
+        phraseDiv.textContent = `phrase: ${phraseValue}`;
+        // 为 phrase 字段添加红色样式
+        phraseDiv.style.color = 'red';
+
+        // 新增 text 字段的右键菜单
+        let textDiv = document.createElement('div');
+        textDiv.textContent = `Text: ${item.text}`;
+        textDiv.oncontextmenu = function (e) {
+            e.preventDefault();
+            let menu = document.createElement('div');
+            menu.style.position = 'absolute';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.style.backgroundColor = 'white';
+            menu.style.border = '1px solid black';
+            menu.style.padding = '5px';
+
+            let addToWordButton = document.createElement('button');
+            addToWordButton.textContent = '加入 word';
+            addToWordButton.onclick = function () {
+                let selection = window.getSelection().toString();
+                item.word = selection;
+                wordDiv.textContent = `word: ${item.word}`;
+                localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 更新存储
+                menu.remove();
+            };
+
+            let addToPhraseButton = document.createElement('button');
+            addToPhraseButton.textContent = '加入 phrase';
+            addToPhraseButton.onclick = function () {
+                let selection = window.getSelection().toString();
+                item.phrase = selection;
+                phraseDiv.textContent = `phrase: ${item.phrase}`;
+                localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 更新存储
+                menu.remove();
+            };
+
+            let clearWordButton = document.createElement('button');
+            clearWordButton.textContent = '清除 word';
+            clearWordButton.onclick = function () {
+                item.word = '';
+                wordDiv.textContent = `word: ${item.word}`;
+                localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 更新存储
+                menu.remove();
+            };
+
+            let clearPhraseButton = document.createElement('button');
+            clearPhraseButton.textContent = '清除 phrase';
+            clearPhraseButton.onclick = function () {
+                item.phrase = '';
+                phraseDiv.textContent = `phrase: ${item.phrase}`;
+                localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 更新存储
+                menu.remove();
+            };
+
+            menu.appendChild(addToWordButton);
+            menu.appendChild(addToPhraseButton);
+            menu.appendChild(clearWordButton);
+            menu.appendChild(clearPhraseButton);
+            document.body.appendChild(menu);
+        };
+
+        listItem.appendChild(deleteButton);
+        listItem.appendChild(playButton);
+        listItem.appendChild(textDiv);
+        listItem.appendChild(wordDiv);
+        listItem.appendChild(phraseDiv);
+        listItem.appendChild(loopButton);
+        abList.appendChild(listItem);
+    });
+}
+
+    function playAB(a, b) {
+        audio.currentTime = a;
+        audio.play();
+        let loopCheck = function() {
+            if (audio.currentTime >= b) {
+                audio.pause();
+                audio.removeEventListener("timeupdate", loopCheck);
+            }
+        };
+        audio.addEventListener("timeupdate", loopCheck);
+    }
+
+    function loopSpecificAB(a, b) {
+        // 移除所有之前的 timeupdate 监听器，避免冲突
+        let previousLoopCheck;  // 保存之前的 loopCheck 函数
+        if (audio.loopCheck) {
+            previousLoopCheck = audio.loopCheck;
+            audio.removeEventListener("timeupdate", previousLoopCheck);
+        }
+        audio.currentTime = a;
+        audio.play();
+        // 重新定义 loopCheck 方法，确保只循环当前片段
+        function loopCheck() {
+            if (audio.currentTime >= b) {
+                audio.currentTime = a;
+                audio.play();
+            }
+        }
+        // 绑定新的 timeupdate 事件监听器，并将其保存到 audio 对象上
+        audio.loopCheck = loopCheck;
+        audio.addEventListener("timeupdate", audio.loopCheck);
+    }
+
+    function clearAllAB() {
+        savedABList = [];
+        localStorage.removeItem("savedABList");
+        updateABList();
+    }
+
+    function saveCSV() {
+    const title = document.getElementById('title').value.trim();
+    // 获取当前日期并格式化为 mmdd
+    const today = new Date();
+    const month = ("0" + (today.getMonth() + 1)).slice(-2);  // 获取两位数的月份
+    const day = ("0" + today.getDate()).slice(-2);  // 获取两位数的日期
+    const filename = `${month}${day}-${title}.csv`;  // 格式化为 mmdd-title
+    // 调整列头顺序，将 word 和 phrase 放在 b 列后面
+    let csvContent = "ID,title,url,A,B,word,phrase,Text,Data-Translation\n";
+    savedABList.forEach(item => {
+        // 对 text 和 dataTranslation 字段进行转义处理
+        let escapedText = item.text? `"${item.text.replace(/"/g, '""')}"` : '""';
+        let escapedDataTranslation = item.dataTranslation? `"${item.dataTranslation.replace(/"/g, '""')}"` : '""';
+        let escapedWord = item.word? `"${item.word.replace(/"/g, '""')}"` : '""';
+        let escapedPhrase = item.phrase? `"${item.phrase.replace(/"/g, '""')}"` : '""';
+        // 调整列输出顺序
+        csvContent += `${item.id},${item.title},${document.getElementById('mp3-url').value.trim()},${item.a.toFixed(2)},${item.b.toFixed(2)},${escapedWord},${escapedPhrase},${escapedText},${escapedDataTranslation}\n`;
+    });
+    let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
+
+    // 从本地存储加载已保存的 AB 片段
+    function loadSavedAB() {
+        let savedAB = JSON.parse(localStorage.getItem("savedABList"));
+        if (savedAB) {
+            savedABList = savedAB;
+            currentId = savedAB.length > 0? savedAB[0].id + 1 : 100; // 从最新 id 开始递增
+            updateABList();
+        }
+    }
+
+    // 查找最后一个 pointA < a 和第一个 pointB > b 的记录索引，并拼接 text 和 dataTranslation
+    function findIndicesAndConcatenate(pointA, pointB, data) {
+        let lastPointAIndex = -1;
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].pointA < pointA) {
+                lastPointAIndex = i;
+            } else {
+                break;
+            }
+        }
+
+        let firstPointBIndex = -1;
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].pointB > pointB) {
+                firstPointBIndex = i;
+                break;
+            }
+        }
+
+        let text = '';
+        let dataTranslation = '';
+        if (lastPointAIndex !== -1 && firstPointBIndex !== -1 && firstPointBIndex > lastPointAIndex) {
+            for (let i = lastPointAIndex; i <= firstPointBIndex; i++) {
+                text += data[i].text + '\n';
+                dataTranslation += data[i].dataTranslation + '\n';
+            }
+        }
+
+        return { text, dataTranslation };
+    }
+
+    function queryText() {
+        // 获取当前的 A 点和 B 点
+        const currentPointA = pointA;
+        const currentPointB = pointB;
+
+        // 检查 A 点和 B 点是否有效
+        if (!currentPointA || !currentPointB || currentPointB <= currentPointA) {
+            alert("请先正确设置 A 和 B 点，且确保 B > A！");
+            return;
+        }
+
+        // 查找最后一个 pointA < a 和第一个 pointB > b 的记录索引，并拼接 text 和 dataTranslation
+        const { text, dataTranslation } = findIndicesAndConcatenate(currentPointA, currentPointB, audioData);
+
+        // 获取显示查询结果的区域
+        const queryResultDiv = document.getElementById('query-result');
+        queryResultDiv.innerHTML = '';
+
+        if (text === '') {
+            queryResultDiv.textContent = '未找到相关结果';
+        } else {
+            // 拼接符合条件的 text 内容和翻译内容
+            let resultText = '';
+            const lines = text.split('\n');
+            const translations = dataTranslation.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i]) {
+                    resultText += `${lines[i]} (${translations[i]})\n`;
+                }
+            }
+
+            // 使用 <pre> 标签来保留换行符
+            const resultItem = document.createElement('pre');
+            resultItem.textContent = resultText;
+            queryResultDiv.appendChild(resultItem);
+        }
+    }
+
+    function saveAB() {
+        if (pointA && pointB && pointB > pointA) {
+            const title = document.getElementById('title').value.trim();
+            // 查找最后一个 pointA < a 和第一个 pointB > b 的记录索引，并拼接 text 和 dataTranslation
+            const { text, dataTranslation } = findIndicesAndConcatenate(pointA, pointB, audioData);
+
+            let abItem = {
+                id: currentId++,  // 使用当前 ID 并递增
+                title: title,
+                a: pointA,
+                b: pointB,
+                text: text,
+                dataTranslation: dataTranslation,
+                word: '',  // 新增 word 字段
+                phrase: '' // 新增 phrase 字段
+            };
+            savedABList.unshift(abItem);  // 添加到列表前面
+            localStorage.setItem("savedABList", JSON.stringify(savedABList)); // 存储到本地
+            updateABList();
+        }
+    }
+
+    // 上一句按钮点击事件处理函数
+    function prevSentence() {
+        if (currentQueryIndex > 0) {
+            currentQueryIndex--;
+            updateQueryResult(currentQueryIndex);
+        }
+    }
+
+    // 下一句按钮点击事件处理函数
+    function nextSentence() {
+        if (currentQueryIndex < csvData.length - 1) {
+            currentQueryIndex++;
+            updateQueryResult(currentQueryIndex);
+        }
+    }
+
+    // 根据索引更新查询结果显示
+    function updateQueryResult(index) {
+        let row = csvData[index];
+        let queryResultDiv = document.getElementById('query-result');
+        queryResultDiv.innerHTML = `Text: ${row.Text}, Data-Translation: ${row['Data-Translation']}`;
+        // 更新音频播放位置到该条记录的起始时间
+        audio.currentTime = parseFloat(row.a);
+    }
+
+    // 批量保存
+    function batchSaveAB() {
+        const title = document.getElementById('title').value.trim();
+        if (!title) {
+            alert("请输入标题！");
+            return;
+        }
+        // 准备要发送的数据
+        const abItems = savedABList.map(item => ({
+            title: title,
+            pointA: item.a,
+            pointB: item.b,
+            word: item.word || null,
+            phrase: item.phrase || null,
+            text: item.text,
+            dataTranslation: item.dataTranslation
+        }));
+        // 发送 POST 请求
+        fetch('/savedAudioClips/batch', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(abItems)
+        })
+       .then(response => response.json())
+       .then(data => {
+            console.log('批量保存成功:', data);
+            alert('批量保存成功');
+        })
+       .catch(error => {
+            console.error('批量保存出错:', error);
+            alert('批量保存出错，请稍后再试');
+        });
+    }
+</script>
+</body>
+</html>
