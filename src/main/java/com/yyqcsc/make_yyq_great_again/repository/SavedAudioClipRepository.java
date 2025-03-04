@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SavedAudioClipRepository extends JpaRepository<SavedAudioClip, Long> {
-    List<SavedAudioClip> findAllByOrderById();
+    List<SavedAudioClip> findAllByOrderByIdAsc();
 
-    List<SavedAudioClip> findByTitle(String title);
+    List<SavedAudioClip> findByTitleOrderByIdAsc(String title);
 }

@@ -19,9 +19,9 @@ public class SavedAudioClipController {
     @GetMapping
     public List<SavedAudioClip> audioClips(@RequestParam(required = false) String title) {
         if (title != null) {
-            return audioClipRepository.findByTitle(title);
+            return audioClipRepository.findByTitleOrderByIdAsc(title);
         } else {
-            return audioClipRepository.findAllByOrderById();
+            return audioClipRepository.findAllByOrderByIdAsc();
         }
     }
 

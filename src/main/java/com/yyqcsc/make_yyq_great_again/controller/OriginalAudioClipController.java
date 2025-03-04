@@ -20,9 +20,9 @@ public class OriginalAudioClipController {
     @GetMapping("")
     public List<OriginalAudioClip> audioClips(@RequestParam(required = false) String title) {
         if (title != null) {
-            return originalAudioClipRepository.findByTitle(title);
+            return originalAudioClipRepository.findByTitleOrderByIdAsc(title);
         } else {
-            return originalAudioClipRepository.findAllByOrderById();
+            return originalAudioClipRepository.findAllByOrderByIdAsc();
         }
     }
 }

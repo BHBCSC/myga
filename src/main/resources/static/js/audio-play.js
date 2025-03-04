@@ -2,6 +2,32 @@
 const backToTop = document.getElementById('back-to-top');
 const titleSearchInput = document.getElementById('titleSearchInput');
 const titleSearchButton = document.getElementById('titleSearchButton');
+const globalSpeedSelect = document.getElementById('globalSpeedSelect');
+
+globalSpeedSelect.addEventListener('change', function () {
+    const newSpeed = parseFloat(this.value);
+    // 更新所有音频的播放速度
+    for (let audioUrl in audioCache) {
+        const audio = audioCache[audioUrl];
+        audio.playbackRate = newSpeed;
+    }
+    // 更新表格中每个音频对应的速度选择框的值
+    const speedSelects = document.querySelectorAll('table tbody tr td select');
+    speedSelects.forEach(select => {
+        const options = select.options;
+        for (let i = 0; i < options.length; i++) {
+            if (parseFloat(options[i].value) === newSpeed) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    });
+    // 如果有正在播放的音频，更新其播放速度
+    if (currentlyPlayingAudio) {
+        currentlyPlayingAudio.playbackRate = newSpeed;
+    }
+});
+
 titleSearchButton.addEventListener('click', function () {
     const searchTitle = titleSearchInput.value;
     if (searchTitle) {
@@ -56,13 +82,11 @@ backToTop.addEventListener('click', () => {
     });
 });
 
-const loopAllButton = document.getElementById('loopAllButton');
 const nextLoopButton = document.getElementById('nextLoopButton');
 const prevLoopButton = document.getElementById('prevLoopButton');
 const stopButton = document.getElementById('stopButton');
 const audioTable = document.getElementById('audioTable');
 const tableBody = audioTable.getElementsByTagName('tbody')[0];
-const globalSpeedSelect = document.getElementById('globalSpeedSelect');
 const currentIdDisplay = document.getElementById('currentId');
 const previousIdDisplay = document.getElementById('previousId');
 const tooltip = document.getElementById('tooltip'); // 获取浮窗元素

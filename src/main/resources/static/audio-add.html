@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MP3播放器</title>
+    <!-- 指定自定义图标 -->
+    <link rel="icon" href="icon.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -89,13 +91,15 @@
     let audioData = []; // 新增全局变量用于存储从接口获取的数据
 
     // 获取并加载本地存储的数据
-    window.onload = function () {
+    window.addEventListener('load', function () {
         loadSavedAB();
         loadCachedData();
-    };
+    });
 
     function loadCachedData() {
         const title = localStorage.getItem('title');
+
+        console.log('Data loaded from localStorage:', { title});
         if (title) {
             document.getElementById('title').value = title;
             const mp3Url = `/audio/${title}.mp3`;
@@ -139,7 +143,7 @@
             saveCachedData();  // 缓存标题
 
             // 从接口获取数据
-            fetch(`/originalAudioClips/title/${title}`)
+            fetch(`/originalAudioClips?title=${title}`)
               .then(response => response.json())
               .then(data => {
                     audioData = data; // 存储获取到的数据
@@ -529,5 +533,8 @@
         });
     }
 </script>
+
+<!-- 引入 nav.js 文件 -->
+<script src="js/nav.js"></script>
 </body>
 </html>
