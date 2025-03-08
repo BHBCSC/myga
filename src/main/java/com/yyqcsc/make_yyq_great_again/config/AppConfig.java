@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
-import java.util.Objects;
 
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
@@ -18,6 +17,8 @@ public class AppConfig implements WebMvcConfigurer {
         String audioLocation;
         if (os.contains("win")) {
             audioLocation = "file:D:/myga/audio/";
+        } else if (os.contains("mac")) {
+            audioLocation = "file:/Users/yyq/PycharmProjects/PythonProject1/ielts/audio_files";
         } else {
             audioLocation = "file:/app/myga/audio/";
         }
@@ -31,6 +32,8 @@ public class AppConfig implements WebMvcConfigurer {
         String jdbcUrl;
         if (os.contains("win")) {
             jdbcUrl = "jdbc:h2:file:D:/myga/h2/myga_db;AUTO_SERVER=TRUE";
+        } else if (os.contains("mac")) {
+            jdbcUrl = "jdbc:h2:file:/Users/yyq/myga/h2/myga_db;AUTO_SERVER=TRUE";
         } else {
             jdbcUrl = "jdbc:h2:file:/app/myga/h2/myga_db;AUTO_SERVER=TRUE";
         }

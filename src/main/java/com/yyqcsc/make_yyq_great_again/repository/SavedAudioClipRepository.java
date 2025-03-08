@@ -8,5 +8,5 @@ import java.util.List;
 public interface SavedAudioClipRepository extends JpaRepository<SavedAudioClip, Long> {
     List<SavedAudioClip> findAllByOrderByIdAsc();
 
-    List<SavedAudioClip> findByTitleOrderByIdAsc(String title);
+    List<SavedAudioClip> findByTitleContainingOrderByIdAsc(String title);
 }

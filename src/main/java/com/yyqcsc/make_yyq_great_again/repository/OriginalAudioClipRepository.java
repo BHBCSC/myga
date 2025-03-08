@@ -9,4 +9,7 @@ public interface OriginalAudioClipRepository extends JpaRepository<OriginalAudio
     List<OriginalAudioClip> findAllByOrderByIdAsc();
 
     List<OriginalAudioClip> findByTitleOrderByIdAsc(String title);
+
+    List<OriginalAudioClip> findByTitleContainingOrderByIdAsc(String title);
+
 }
