@@ -402,8 +402,8 @@
 
         let text = '';
         let dataTranslation = '';
-        if (lastPointAIndex !== -1 && firstPointBIndex !== -1 && firstPointBIndex > lastPointAIndex) {
-            for (let i = lastPointAIndex; i <= firstPointBIndex; i++) {
+        if ((lastPointAIndex !== -1 || firstPointBIndex !== -1) && firstPointBIndex >= lastPointAIndex) {
+            for (let i = lastPointAIndex == -1 ? 0 : lastPointAIndex; i <= firstPointBIndex; i++) {
                 text += data[i].text + '\n';
                 dataTranslation += data[i].dataTranslation + '\n';
             }
