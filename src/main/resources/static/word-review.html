@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查询页面</title>
+    <link rel="stylesheet" href="css/word-review.css">
+
+
+</head>
+<body>
+<div class="container">
+    <h2>查询条件</h2>
+    <div class="query-form">
+        <label>类型：</label>
+        <select id="business">
+            <option value="">全部</option>
+            <option value="听力">听力</option>
+            <option value="阅读">阅读</option>
+            <option value="听写">听写</option>
+            <option value="作文">作文</option>
+            <option value="口语">口语</option>
+        </select>
+
+        <label>单词类型：</label>
+        <select id="type">
+            <option value="单词">单词</option>
+            <option value="短语">短语</option>
+        </select>
+
+        <label>单词/短语：</label>
+        <input type="text" id="word">
+
+        <label>结果：</label>
+        <select id="result">
+            <option value="">全部</option>
+            <option value="没记住">没记住</option>
+            <option value="记住">记住</option>
+        </select>
+
+        <label>开始时间：</label>
+        <input type="date" id="reviewBegin">
+
+        <label>结束时间：</label>
+        <input type="date" id="reviewEnd">
+
+        <label>模糊标题：</label>
+        <input type="text" id="fuzzyTitle">
+
+        <label>模糊单词：</label>
+        <input type="text" id="fuzzyWord">
+
+        <button onclick="queryData()">查询</button>
+        <button onclick="resetQuery()">默认</button>
+    </div>
+
+    <h2>查询结果</h2>
+    <button onclick="saveReviewResult()">保存review结果</button>
+    <table id="resultTable">
+        <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
+            <th>Title</th>
+            <th>Business</th>
+            <th>Type</th>
+            <th>Word</th>
+            <th>Result</th>
+            <th>Review Time</th>
+        </tr>
+
+        <!-- 第二行表头（隐藏 & 排序 按钮） -->
+        <tr>
+            <th></th> <!-- 空白单元格，避免对齐错乱 -->
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(1)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(1)">排序</button>
+            </th>
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(2)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(2)">排序</button>
+            </th>
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(3)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(3)">排序</button>
+            </th>
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(4)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(4)">排序</button>
+            </th>
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(5)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(5)">排序</button>
+            </th>
+            <th>
+                <button class="hide-btn" onclick="toggleColumn(6)">隐藏</button>
+                <button class="sort-btn" onclick="sortTable(6)">排序</button>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<script src="js/word-review.js"></script>
+</body>
+</html>

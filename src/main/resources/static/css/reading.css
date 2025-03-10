@@ -1,0 +1,141 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#fontSizeSelector {
+    margin-bottom: 20px;
+}
+
+
+
+.highlight-word {
+    background-color: lightcoral;
+}
+
+.highlight-phrase {
+    background-color: #FFD700;
+}
+
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 动态翻译按钮 */
+#dynamicTranslateBtn {
+    position: absolute;
+    display: none;
+    background: #007BFF;
+    color: white;
+    padding: 18px 30px;
+    border-radius: 8px;
+    z-index: 9999;
+    font-size: 24px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    touch-action: none;
+    transform: translate(-50%, 10px);
+}
+
+/* 翻译弹窗 */
+#translationPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100000;
+    max-width: 90%;
+    width: 300px;
+    height: 300px;
+    display: none;
+    flex-direction: column;
+}
+
+#translationPopupContent {
+    font-size: 32px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+    user-select: none;
+}
+
+#popupButtonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+}
+
+#popupButtonContainer button {
+    width: 100%;
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    height: 70px;
+    flex-shrink: 0;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#fontSizeSelector, .query-fields {
+    margin-bottom: 20px;
+}
+
+.query-fields {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.query-fields label {
+    font-weight: bold;
+}
+
+.query-fields select {
+    padding: 5px;
+    font-size: 14px;
+}
+
+#article {
+    line-height: 1.6;
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 5px;
+    min-height: 100px;
+    font-size: 16px;
+}
+
+.word-list,
+.phrase-list {
+    margin-top: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}

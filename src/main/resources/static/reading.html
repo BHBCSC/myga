@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>文章阅读 & 单词管理</title>
+    <link rel="stylesheet" href="css/reading.css">
+</head>
+
+<body>
+<button id="clearCacheButton" onclick="clearCache()">清除缓存</button>
+
+<label for="fontSizeSelector">字号选择器:</label>
+<select id="fontSizeSelector" onchange="changeFontSize()">
+    <option value="12px">12px</option>
+    <option value="14px">14px</option>
+    <option value="16px" selected>16px</option>
+    <option value="20px">20px</option>
+    <option value="30px">30px</option>
+    <option value="40px">40px</option>
+    <option value="50px">50px</option>
+</select>
+
+<h2>文章阅读</h2>
+<!-- ✅ 新增查询字段 -->
+<div class="query-fields">
+    <label for="title">Title:</label>
+    <select id="title">
+        <option value="全部">全部</option>
+    </select>
+
+    <label for="smallTitle">Small Title:</label>
+    <select id="smallTitle">
+        <option value="全部">全部</option>
+    </select>
+    <button id="queryAndOverrideButton" onclick="queryAndOverride()">查询接口数据并覆盖</button>
+</div>
+
+<h2>文章阅读</h2>
+<p id="article">请选择 Title 和 Small Title 查看文章内容</p>
+
+<div class="word-list">
+    <h3>Word List</h3>
+    <ul id="wordList"></ul>
+    <button onclick="copyToExcel('word')">复制到 Excel</button>
+    <!-- ✅ 在【复制到 Excel】按钮后新增【保存 review 结果】按钮 -->
+    <button onclick="saveReviewResult('word')">保存 review 结果</button>
+
+</div>
+
+<div class="phrase-list">
+    <h3>Phrase List</h3>
+    <ul id="phraseList"></ul>
+    <button onclick="copyToExcel('phrase')">复制到 Excel</button>
+    <!-- ✅ 在 Phrase List 的【复制到 Excel】按钮后新增【保存 review 结果】按钮 -->
+    <button onclick="saveReviewResult('phrase')">保存 review 结果</button>
+
+</div>
+
+<button id="dynamicTranslateBtn" onclick="translateText()">翻译</button>
+
+<div id="translationPopup">
+    <div id="translationPopupContent"></div>
+    <div id="popupButtonContainer">
+        <button onclick="addToList('word')">加入 Word</button>
+        <button onclick="addToList('phrase')">加入 Phrase</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="js/reading.js"></script>
+</body>
+
+</html>

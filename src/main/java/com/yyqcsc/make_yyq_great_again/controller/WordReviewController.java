@@ -1,6 +1,5 @@
 package com.yyqcsc.make_yyq_great_again.controller;
 
-import com.yyqcsc.make_yyq_great_again.model.SavedAudioClip;
 import com.yyqcsc.make_yyq_great_again.model.WordReview;
 import com.yyqcsc.make_yyq_great_again.model.WordReview_;
 import com.yyqcsc.make_yyq_great_again.repository.WordReviewRepository;
@@ -22,8 +21,7 @@ public class WordReviewController {
     @Autowired
     private WordReviewRepository wordReviewRepository;
 
-    @PostMapping
-
+    @PostMapping("")
     public ResponseEntity<WordReview> addWordReview(@RequestBody WordReview wordReview) {
         return new ResponseEntity<>(wordReviewRepository.save(wordReview), HttpStatus.CREATED);
     }
